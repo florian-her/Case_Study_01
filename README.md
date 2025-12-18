@@ -22,11 +22,11 @@ streamlit run main.py
 
 ## UI Mockups (Abgabe I)
 
-### 1. Geräte-Verwaltung
+### 1. Geräte-Übersicht
 ![Ansicht Geräte](mockup_geraete.png)
 
-### 2. Nutzer-Verwaltung
-![Ansicht Nutzer](mockup_nutzer.png)
+### 2. Geräte-Verwaltung
+![Ansicht Nutzer](mockup_geraete2.png)
 
-### 3. Übersicht
-![Ansicht Übersicht](mockup_uebersicht.png)
+### 3. Nutzer-Verwaltung
+![Ansicht Übersicht](mockup_nutzer.png)
