@@ -1,9 +1,6 @@
 import streamlit as st
 # Importiere die neuen Module aus dem Ordner "tabs"
-import tabs.tab_devices as tab_devices
-import tabs.tab_users as tab_users
-import tabs.tab_reservation as tab_reservation
-import tabs.tab_maintenance as tab_maintenance
+from tabs import tab_devices, tab_users, tab_reservation, tab_maintenance
 
 # 1. Konfiguration
 st.set_page_config(page_title="Geräte-Verwaltung", layout="wide")

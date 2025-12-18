@@ -1,3 +1,5 @@
-run()
+import streamlit as st
 
-##das ist ein kommentar haha
+def run():
+    st.header("Wartungsübersicht")
+    st.info("Dieses Modul wird in der nächsten Projektphase implementiert.")
