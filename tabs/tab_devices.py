@@ -1,29 +1,35 @@
 import streamlit as st
 from datetime import date
+from devices import Device
+from users import User # Für Verantwortliche
 
 def run():
     st.header("Geräte-Verwaltung")
     
     # --- ANZEIGE ---
-    if 'devices' in st.session_state:
-        st.dataframe(st.session_state.devices)
-    
+    devices_data = Device.load_all()
+    st.dataframe(devices_data)
+
     st.markdown("---")
     
     # --- NEUES GERÄT ANLEGEN ---
     st.subheader("Neues Gerät anlegen")
     
+    users_db = User.load_all()
+
+    user_emails = [u['email'] for u in users_db]
+
     with st.form("new_device_form"):
         col1, col2 = st.columns(2)
         
         with col1:
             device_id = st.text_input("Geräte-ID (Inventarnummer)")
             name = st.text_input("Gerätename")
-            verantwortlicher = st.text_input("Verantwortliche Person (E-Mail)")
+            verantwortlicher = st.selectbox("Verantwortliche Person", options=user_emails)
         
         with col2:
             creation_date = st.date_input("Anschaffungsdatum", value=date.today())
-            end_of_life = st.date_input("End of Life (Datum)")
+            end_of_life = st.date_input("End of Life (Datum)", value=date.today())
         
         st.markdown("### Wartungs-Einstellungen")
         col3, col4 = st.columns(2)
@@ -31,17 +37,24 @@ def run():
             maintenance_interval = st.number_input("Wartungsintervall (Tage)", min_value=1, step=1)
             maintenance_cost = st.number_input("Wartungskosten (€)", min_value=0.0, step=0.10)
         with col4:
-            next_maintenance = st.date_input("Nächster Wartungstermin")
-
+            next_maintenance = st.date_input("Nächster Wartungstermin", value=date.today())
+            
         submitted = st.form_submit_button("Gerät speichern")
         
         if submitted:
-            st.success(f"Gerät '{name}' wurde erfolgreich (simuliert) angelegt!")
-            new_device_entry = {
-                "id": device_id, 
-                "name": name, 
-                "user": verantwortlicher,
-                "next_maintenance": next_maintenance
-            }
-            st.session_state.devices.append(new_device_entry)
-            st.rerun()
+            if device_id and name and verantwortlicher:
+                new_device = Device(
+                    device_id=device_id,
+                    name=name,
+                    responsible_person=verantwortlicher,
+                    creation_date=creation_date,
+                    end_of_life=end_of_life,
+                    maintenance_cost=maintenance_cost,
+                    next_maintenance=next_maintenance,
+                    maintenance_interval=maintenance_interval
+                )
+                new_device.store_data()
+                st.success(f"Gerät '{name}' erfolgreich angelegt!")
+                st.rerun()
+            else:
+                st.error("Bitte ID,Name und Verantwortlichen ausfüllen.")

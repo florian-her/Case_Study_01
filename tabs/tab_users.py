@@ -1,12 +1,15 @@
 import streamlit as st
+from users import User
 
 def run():
     st.header("Nutzer-Verwaltung")
+
+    # Laden aus der Datenbank
+    users_data = User.load_all()
     
     # Anzeige der Nutzer
     st.subheader("Vorhandene Nutzer")
-    if 'users' in st.session_state:
-        st.dataframe(st.session_state.users)
+    st.dataframe(users_data)
 
     # Formular
     st.subheader("Neuen Nutzer anlegen")
@@ -18,8 +21,10 @@ def run():
         
         if submitted:
             if email and name:
-                new_user = {"email": email, "name": name}
-                st.session_state.users.append(new_user)
+                # neues Objekt User erstellen und speichern
+                new_user = User(email = email, name = name)
+                new_user.store_data()
+                
                 st.success(f"Nutzer {name} erfolgreich angelegt!")
                 st.rerun()
             else:

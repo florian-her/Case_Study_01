@@ -2,6 +2,14 @@
 
 **Team:** Simen Cherubin, Florian Herzog
 
+## ToDo
+~ bis Abgabe 08.01.26
+- Löschen von Geräten und Nutzern implementieren
+- Automatische Datumsberechnung bei Wartungsintervallen
+- Code dokumentieren und ggf. aufräumen
+- README vervollständigen
+- Testfiles löschen
+
 ## Projektbeschreibung
 Dieses Projekt implementiert eine Geräteverwaltung für Hochschulen mittels Streamlit (Python).
 

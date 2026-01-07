@@ -6,12 +6,7 @@ from tabs import tab_devices, tab_users, tab_reservation, tab_maintenance
 st.set_page_config(page_title="Geräte-Verwaltung", layout="wide")
 st.title("Geräte-Verwaltung der Hochschule")
 
-# 2. Mock-Daten Initialisierung (Global für alle Tabs)
-if 'devices' not in st.session_state:
-    st.session_state.devices = [
-        {"id": "1", "name": "3D-Drucker Prusa MK3", "user": "m.panny@fh.at"},
-        {"id": "2", "name": "Laser-Cutter", "user": "j.huber@fh.at"}
-    ]
+# 2. Mock-Daten entfernt
 
 # 3. Tabs erstellen
 tab1, tab2, tab3, tab4 = st.tabs([
