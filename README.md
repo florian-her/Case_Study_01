@@ -4,7 +4,7 @@
 
 ## ToDo
 ~ bis Abgabe 08.01.26
-- Automatische Datumsberechnung bei Wartungsintervallen
+- Automatische Datumsberechnung bei Wartungsintervallen (funktioniert noch nicht)
 - Code dokumentieren und ggf. aufräumen
 - README vervollständigen
 - Testfiles löschen
