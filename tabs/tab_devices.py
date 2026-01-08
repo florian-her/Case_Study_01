@@ -1,24 +1,44 @@
 import streamlit as st
 from datetime import date
 from devices import Device
-from users import User # Für Verantwortliche
+from users import User
 
 def run():
     st.header("Geräte-Verwaltung")
     
-    # --- ANZEIGE ---
+    # --- 1. ANZEIGE ---
     devices_data = Device.load_all()
-    st.dataframe(devices_data)
+    if devices_data:
+        st.subheader("Alle registrierten Geräte")
+        st.dataframe(devices_data, use_container_width=True)
+    else:
+        st.info("Noch keine Geräte in der Datenbank vorhanden.")
 
     st.markdown("---")
-    
-    # --- NEUES GERÄT ANLEGEN ---
+
+    # --- 2. GERÄT LÖSCHEN [NEU] ---
+    if devices_data:
+        st.subheader("Gerät löschen")
+        # Liste der IDs für das Dropdown erstellen
+        device_ids = [d['device_id'] for d in devices_data]
+        selected_id = st.selectbox("Wähle ein Gerät anhand der ID zum Löschen aus:", device_ids)
+        
+        if st.button("Gerät löschen", type="primary"):
+            Device.delete(selected_id)
+            st.warning(f"Gerät mit ID {selected_id} wurde erfolgreich gelöscht.")
+            st.rerun()
+        st.markdown("---")
+
+    # --- 3. NEUES GERÄT ANLEGEN ---
     st.subheader("Neues Gerät anlegen")
     
     users_db = User.load_all()
-
     user_emails = [u['email'] for u in users_db]
 
+    # Falls noch keine Nutzer existieren, Warnung anzeigen
+    if not user_emails:
+        st.warning("Bitte lege zuerst einen Nutzer in der Nutzer-Verwaltung an, um einen Verantwortlichen zuweisen zu können.")
+    
     with st.form("new_device_form"):
         col1, col2 = st.columns(2)
         
@@ -57,4 +77,4 @@ def run():
                 st.success(f"Gerät '{name}' erfolgreich angelegt!")
                 st.rerun()
             else:
-                st.error("Bitte ID,Name und Verantwortlichen ausfüllen.")
+                st.error("Bitte ID, Name und Verantwortlichen ausfüllen.")
