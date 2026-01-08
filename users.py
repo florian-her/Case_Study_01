@@ -2,9 +2,12 @@ import os
 from tinydb import TinyDB, Query
 from serializer import serializer
 
+# Absoluter Pfad zur Datenbank-Datei
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'database.json')
 
 class User:
+
+    #Verbindung zur Datenbank-Tabelle 'users'
     db_connector = TinyDB(DB_PATH, storage=serializer).table('users')
 
     def __init__(self, email, name):
@@ -13,7 +16,9 @@ class User:
 
     def store_data(self):
         UserQuery = Query()
+        # Prüfen ob Nutzer bereits existiert
         result = self.db_connector.search(UserQuery.email == self.email)
+        # Daten als Dictionary vorbereiten
         data = {"email": self.email, "name": self.name}
 
         if result:

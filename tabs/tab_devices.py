@@ -6,17 +6,19 @@ from users import User
 def run():
     st.header("Geräte-Verwaltung")
     
-    # --- 1. ANZEIGE ---
+    # 1. ANZEIGE 
+    # Lade alle Geräte aus der Datenbank
     devices_data = Device.load_all()
     if devices_data:
         st.subheader("Alle registrierten Geräte")
+        # Anzeigen der Dictionaries als Tabelle
         st.dataframe(devices_data, use_container_width=True)
     else:
         st.info("Noch keine Geräte in der Datenbank vorhanden.")
 
     st.markdown("---")
 
-    # --- 2. GERÄT LÖSCHEN [NEU] ---
+    # 2. GERÄT LÖSCHEN
     if devices_data:
         st.subheader("Gerät löschen")
         # Liste der IDs für das Dropdown erstellen
@@ -24,14 +26,17 @@ def run():
         selected_id = st.selectbox("Wähle ein Gerät anhand der ID zum Löschen aus:", device_ids)
         
         if st.button("Gerät löschen", type="primary"):
+            # Aufruf der Lösch-Methode aus backend
             Device.delete(selected_id)
             st.warning(f"Gerät mit ID {selected_id} wurde erfolgreich gelöscht.")
+            # Wichtig, neu laden
             st.rerun()
         st.markdown("---")
 
-    # --- 3. NEUES GERÄT ANLEGEN ---
+    # 3. NEUES GERÄT ANLEGEN
     st.subheader("Neues Gerät anlegen")
     
+    # Laden der Nutzer für dropdown
     users_db = User.load_all()
     user_emails = [u['email'] for u in users_db]
 
@@ -45,6 +50,7 @@ def run():
         with col1:
             device_id = st.text_input("Geräte-ID (Inventarnummer)")
             name = st.text_input("Gerätename")
+            # dropdown für Verantwortlichen
             verantwortlicher = st.selectbox("Verantwortliche Person", options=user_emails)
         
         with col2:
@@ -63,6 +69,8 @@ def run():
         
         if submitted:
             if device_id and name and verantwortlicher:
+                # Neues Gerät-Objekt erstellen und speichern
+                # Daten an Device-Klasse übergeben
                 new_device = Device(
                     device_id=device_id,
                     name=name,

@@ -32,8 +32,10 @@ class Device:
     def store_data(self):
         print(f"Speichere Gerät {self.name} ...")
         DeviceQuery = Query()
+        # suche nach existierendem Gerät
         result = self.db_connector.search(DeviceQuery.device_id == self.device_id)
 
+        # Daten als Dictionary vorbereiten
         data = {
             "device_id": self.device_id,
             "name": self.name,
@@ -56,7 +58,7 @@ class Device:
 
     @classmethod
     def delete(cls, device_id):
-       
+       # Löscht ein Gerät anhand der Geräte-ID
         DeviceQuery = Query()
         cls.db_connector.remove(DeviceQuery.device_id == device_id)
         print(f"Gerät {device_id} wurde gelöscht.")
