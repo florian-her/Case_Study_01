@@ -2,11 +2,9 @@ import os
 from tinydb import TinyDB, Query
 from serializer import serializer
 
-# Pfad zur Datenbank
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'database.json')
 
 class User:
-    # Verbindung zur Tabelle 'users' herstellen
     db_connector = TinyDB(DB_PATH, storage=serializer).table('users')
 
     def __init__(self, email, name):
