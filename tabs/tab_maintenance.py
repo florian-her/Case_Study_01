@@ -10,9 +10,8 @@ def run():
         st.warning("Keine Geräte im System gefunden.")
         return
 
-    devices = st.session_state.devices
+    devices = Device.load_all()
 
-    # --- TEIL 1: DASHBOARD / ÜBERSICHT ---
     st.subheader("Aktueller Wartungsstatus")
     
     # Mock-Daten Anreicherung
@@ -78,7 +77,6 @@ def run():
 
     st.markdown("---")
 
-    # --- TEIL 2: WARTUNG DURCHFÜHREN ---
     st.subheader("Wartung protokollieren")
     
     with st.form("maintenance_form"):
