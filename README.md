@@ -4,7 +4,6 @@
 
 ## ToDo
 ~ bis Abgabe 08.01.26
-- Löschen von Geräten und Nutzern implementieren
 - Automatische Datumsberechnung bei Wartungsintervallen
 - Code dokumentieren und ggf. aufräumen
 - README vervollständigen
