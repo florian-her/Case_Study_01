@@ -1,37 +1,23 @@
-import os 
-from tinydb import TinyDB, Query
-from serializer import serializer
+from serializable import Serializable
+from database import DatabaseConnector
 
-# Absoluter Pfad zur Datenbank-Datei
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'database.json')
+class User(Serializable):
+    db_connector = DatabaseConnector().get_table("users")
 
-class User:
-
-    #Verbindung zur Datenbank-Tabelle 'users'
-    db_connector = TinyDB(DB_PATH, storage=serializer).table('users')
-
-    def __init__(self, email, name):
+    def __init__(self, email, name, creation_date=None, last_update=None):
+        super().__init__(id=email, creation_date=creation_date, last_update=last_update)
+        
         self.email = email
         self.name = name
 
-    def store_data(self):
-        UserQuery = Query()
-        # Prüfen ob Nutzer bereits existiert
-        result = self.db_connector.search(UserQuery.email == self.email)
-        # Daten als Dictionary vorbereiten
-        data = {"email": self.email, "name": self.name}
-
-        if result:
-            self.db_connector.update(data, doc_ids=[result[0].doc_id])
-        else:
-            self.db_connector.insert(data)
-        
-    @classmethod
-    def load_all(cls):
-        return cls.db_connector.all()
+    def __str__(self):
+        return f"User: {self.name} ({self.email})"
 
     @classmethod
-    def delete(cls, email):
-        """Löscht einen Nutzer anhand der E-Mail-Adresse [Neu hinzugefügt]"""
-        UserQuery = Query()
-        cls.db_connector.remove(UserQuery.email == email)
+    def instantiate_from_dict(cls, data: dict):
+        return cls(
+            email=data.get("email"),
+            name=data.get("name"),
+            creation_date=data.get("creation_date"),
+            last_update=data.get("last_update")
+        )
