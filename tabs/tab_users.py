@@ -4,13 +4,15 @@ from users import User
 def run():
     st.header("Nutzer-Verwaltung")
 
-    # 1. Laden aus der Datenbank
-    users_data = User.load_all()
+    # 1. Laden aus der Datenbank (Objekte!)
+    users = User.find_all()
     
     # 2. Anzeige der Nutzer
     st.subheader("Vorhandene Nutzer")
-    if users_data:
-        st.dataframe(users_data, use_container_width=True)
+    if users:
+        # Konvertierung für Anzeige
+        user_data = [{"E-Mail": u.email, "Name": u.name} for u in users]
+        st.dataframe(user_data, use_container_width=True)
     else:
         st.info("Noch keine Nutzer angelegt.")
 
@@ -18,15 +20,19 @@ def run():
     st.divider()
     st.subheader("Nutzer löschen")
     
-    if users_data:
+    if users:
         # Erstellt eine Liste aller E-Mails für das Dropdown
-        user_emails = [u['email'] for u in users_data]
+        user_emails = [u.email for u in users]
         selected_email = st.selectbox("Wähle einen Nutzer zum Löschen aus:", user_emails)
         
         if st.button("Nutzer löschen", type="primary"):
-            User.delete(selected_email)
-            st.warning(f"Nutzer {selected_email} wurde gelöscht.")
-            st.rerun()
+            # Objekt finden
+            user_to_delete = next((u for u in users if u.email == selected_email), None)
+            
+            if user_to_delete:
+                user_to_delete.delete()
+                st.success(f"Nutzer {selected_email} wurde gelöscht.")
+                st.rerun()
     else:
         st.write("Keine Nutzer zum Löschen vorhanden.")
 

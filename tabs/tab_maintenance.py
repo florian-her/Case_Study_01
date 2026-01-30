@@ -1,28 +1,22 @@
 import streamlit as st
-import pandas as pd  # Pandas importieren für das Styling, Voschlag von AI
+import pandas as pd
 from datetime import date, timedelta
+from devices import Device
 
 def run():
     st.header("Wartungs-Management")
     
-    # Sicherheits-Check
-    if 'devices' not in st.session_state or not st.session_state.devices:
+    # Daten laden
+    devices = Device.find_all()
+    
+    if not devices:
         st.warning("Keine Geräte im System gefunden.")
         return
 
-    devices = Device.load_all()
-
     st.subheader("Aktueller Wartungsstatus")
     
-    # Mock-Daten Anreicherung
-    for d in devices:
-        if "next_maintenance" not in d:
-            d["next_maintenance"] = date.today() + timedelta(days=30)
-        if "maintenance_cost" not in d:
-            d["maintenance_cost"] = 50.0
-
-    # Sortieren nach Datum
-    sorted_devices = sorted(devices, key=lambda x: x["next_maintenance"])
+    # Sortieren nach Datum (Zugriff via Attribut .next_maintenance)
+    sorted_devices = sorted(devices, key=lambda x: x.next_maintenance if x.next_maintenance else date.max)
 
     col1, col2 = st.columns([2, 1])
     
@@ -32,21 +26,22 @@ def run():
         display_data = []
         for d in sorted_devices:
             status = "OK"
-            if d["next_maintenance"] < date.today():
+            # Datumsvergleich
+            if d.next_maintenance < date.today():
                 status = "ÜBERFÄLLIG"
-            elif d["next_maintenance"] <= date.today() + timedelta(days=7):
+            elif d.next_maintenance <= date.today() + timedelta(days=7):
                 status = "Bald fällig"
             
             display_data.append({
-                "Gerät": d["name"],
+                "Gerät": d.name,
                 "Status": status,
-                "Fällig am": d["next_maintenance"],
-                "Kosten (€)": f"{d['maintenance_cost']:.2f}"
+                "Fällig am": d.next_maintenance,
+                "Kosten (€)": f"{d.maintenance_cost:.2f}"
             })
         
-        df = pd.DataFrame(display_data)  # DataFrame für Styling
+        df = pd.DataFrame(display_data)
 
-        # Funktion, die Farben bestimmt
+        # Styling Funktion
         def highlight_status(val):
             color = ''
             weight = 'normal'
@@ -58,19 +53,18 @@ def run():
                 weight = 'bold'
             elif val == 'OK':
                 color = 'green'
-            
             return f'color: {color}; font-weight: {weight}'
 
-        # Style nur für die Spalte "Status" 
         st.dataframe(
             df.style.map(highlight_status, subset=['Status']),
             use_container_width=True
         )
 
     with col2:
-        # Kleine Metriken
-        num_overdue = sum(1 for d in sorted_devices if d["next_maintenance"] < date.today())
-        total_cost = sum(d["maintenance_cost"] for d in sorted_devices if d["next_maintenance"].year == date.today().year)
+        # Metriken berechnen
+        num_overdue = sum(1 for d in sorted_devices if d.next_maintenance < date.today())
+        # Kosten berechnen
+        total_cost = sum(d.maintenance_cost for d in sorted_devices if d.next_maintenance.year == date.today().year)
         
         st.metric("Überfällige Geräte", num_overdue, delta_color="inverse")
         st.metric("Geschätzte Kosten (dieses Jahr)", f"{total_cost} €")
@@ -80,8 +74,9 @@ def run():
     st.subheader("Wartung protokollieren")
     
     with st.form("maintenance_form"):
-        device_names = [d["name"] for d in devices]
-        selected_device_name = st.selectbox("Welches Gerät wurde gewartet?", device_names)
+        # Mapping Name -> Objekt
+        device_map = {d.name: d for d in devices}
+        selected_device_name = st.selectbox("Welches Gerät wurde gewartet?", list(device_map.keys()))
         
         c1, c2 = st.columns(2)
         with c1:
@@ -95,12 +90,19 @@ def run():
         submit_maintenance = st.form_submit_button("Wartung abschließen & Speichern")
         
         if submit_maintenance:
-            selected_device = next((d for d in devices if d["name"] == selected_device_name), None)
+            # Wir holen das Objekt direkt aus der Map
+            selected_device = device_map[selected_device_name]
             
             if selected_device:
-                old_date = selected_device["next_maintenance"]
-                new_date = maintenance_date + timedelta(days=365)
-                selected_device["next_maintenance"] = new_date
+                # Neues Datum berechnen (Intervall nutzen!)
+                # Falls maintenance_interval ein String ist, sicherheitshalber casten
+                interval = int(selected_device.maintenance_interval)
+                new_date = maintenance_date + timedelta(days=interval)
                 
-                st.success(f"Wartung für '{selected_device_name}' gespeichert!")
+                # Attribute aktualisieren
+                selected_device.next_maintenance = new_date
+                
+                selected_device.store_data()
+                
+                st.success(f"Wartung für '{selected_device_name}' gespeichert! Nächster Termin: {new_date}")
                 st.rerun()
